@@ -1,10 +1,8 @@
-
 <?php
 
 use MongoDB\BSON\ObjectId; 
  
 require 'vendor/autoload.php';
-
 
 session_start();
 
@@ -17,26 +15,32 @@ if (!isset($_SESSION['user_id'])) {
 
 // If logged in, continue with the page content
 
-
-// Logout functionality
-if (isset($_POST['logout'])) {
-  // Unset all session variables
-  session_unset();
-
-  // Destroy the session
-  session_destroy();
-
-  // Redirect to the login page
-  header("Location: login.php");
-  exit();
-}
-
 // MongoDB connection
 $mongoClient = new MongoDB\Client("mongodb://localhost:27017");
 $database = $mongoClient->muzikiszn; // Replace 'your_database_name' with your actual database name
 $userCollection = $database->user;
 $profileCollection = $database->profile;
 
+// Fetch existing profile information if available
+$existingProfile = $profileCollection->findOne(['user_id' => $_SESSION['user_id']]);
+
+// Initialize variables to store existing profile data
+$firstName = '';
+$lastName = '';
+$email = '';
+$phone = '';
+$address = '';
+
+// If existing profile data is found, populate the form fields
+if ($existingProfile) {
+    $firstName = $existingProfile['firstName'];
+    $lastName = $existingProfile['lastName'];
+    $email = $existingProfile['email'];
+    $phone = $existingProfile['phone'];
+    $address = $existingProfile['address'];
+}
+
+// Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Assuming you have retrieved the user's _id from the session or any other source
     $userId = $_SESSION['user_id']; // Replace 'user_id' with the actual session variable storing the user's _id
@@ -68,10 +72,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
-
-
-
 
 
 <!DOCTYPE html>
@@ -129,8 +129,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background: linear-gradient(to left,rgb(102, 102, 179),rgb(188, 198, 234));
         }
     </style>
-
-
 </head>
 <body class="profile-bg">
     <div class="container">
@@ -138,27 +136,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <form action="#" method="post">
             <div class="form-group">
                 <label for="firstName">First Name:</label>
-                <input type="text" id="firstName" name="firstName" required>
+                <input type="text" id="firstName" name="firstName" value="<?php echo $firstName; ?>" required>
             </div>
             <div class="form-group">
                 <label for="lastName">Last Name:</label>
-                <input type="text" id="lastName" name="lastName" required>
+                <input type="text" id="lastName" name="lastName" value="<?php echo $lastName; ?>" required>
             </div>
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" value="<?php echo $email; ?>" required>
             </div>
             <div class="form-group">
                 <label for="phone">Phone Number:</label>
-                <input type="tel" id="phone" name="phone"  placeholder="123-456-7890" required>
+                <input type="tel" id="phone" name="phone" value="<?php echo $phone; ?>" placeholder="123-456-7890" required>
             </div>
             <div class="form-group">
                 <label for="address">Address:</label>
-                <textarea id="address" name="address" rows="4" required></textarea>
+                <textarea id="address" name="address" rows="4" required><?php echo $address; ?></textarea>
             </div>
             <button type="submit">Save Changes</button>
         </form>
     </div>
 </body>
 </html>
-

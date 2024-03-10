@@ -22,12 +22,12 @@
     <div class="muziki-szn">
       <h1>
         <a class="logo" href="/"> MUZIKI SZN </a><br>
-        <i
-         id="ham" class="fa fa-bars"></i>
+        <!-- <i
+         id="ham" class="fa fa-bars"></i> -->
       </h1>
       <div ><form action="">
         <span><i class="fa-solid fa-magnifying-glass"></i></span>
-        <input class="search-bar" type="text" placeholder="what are you looking for?">
+        <input class="search-bar" type="text"  placeholder="search" onkeyup="searchTracks()" >
       </div>
     </form>
       <div class="btn-link">
@@ -63,35 +63,8 @@
   <div>
     <form action="">
       <h1 class="txt-1">MAKE YOUR MUSIC DREAM COME TRUE</h1>
-      <input class="search-bar-2" type="text" placeholder="search here">
+      <input class="search-bar-2" type="text" id="searchInput" placeholder="what are you looking for?" onkeyup="searchTracks()">
     </form>
-    <div class="pic-1">
-      <img src="assets/pexels-photo-8412420.jpeg">
-    </div>
-    <div>
-      <h1 class="txt-2" >
-      COMMENCE YOUR MUSIC JOURNEY <br> START SELLING YOUR BEATS TODAY!
-      </h1>
-    </div>
-    <div class="txt-3">
-      <h1>
-          Looking for the platform to sell your beats? We got you!
-      </h1>
-        <p>
-          <strong> &#x2713; The right marketplace for quality beats</strong> <br> Be able to browse through and get high quality beats
-        </p>
-        <p>
-          <strong> &#x2713;Affordable beat pricing</strong> <br> Get quality beats at an affordable price
-        </p>
-        <p>
-          <strong> &#x2713;Flawless Purchasing Experience</strong> <br> Utilize the user-friendly interface to purchase beats without any problem
-        </p>
-        <div>
-          <a href="login.php">                                      
-          <button class="get-started-btn"> Get started</button>
-        </div> </a>
-    </div>
-
 
 
     <div id="tracks-container">
@@ -138,22 +111,92 @@ foreach ($beats as $beat){
   echo "<p>BPM: {$beat['bpm']}</p>";
   echo "<p>Price: {$beat['price']}</p>";
   echo "<p>Tags: {$beat['tags']}</p>";
+  echo "<p>Genre: {$beat['genre']}</p>";
+  echo "<p>Date: {$beat['date']}</p>";
   echo '<audio controls class="audio-controls">';
   echo '<source src="data:audio/mpeg;base64,' . base64_encode($beat['data']->getData()) . '" type="audio/mpeg">';
   echo 'Your browser does not support the audio element.';
   echo '</audio>';
   
-  echo '<button id="addItemBtn" title="Add to cart" onclick="addItem(' . $beat['price'] . ')">Add to Cart</button>';
+  echo '<button title="Add to cart" onclick="addItem(\'' . $beat['_id'] . '\', \'' . $beat['uploadedaudio'] . '\', \'' . $beat['price'] . '\')">Add to Cart</button>';
   // echo '<button id="removeItemBtn" title="Remove from cart"onclick="removeItem(' . $beat['price'] . ')">Remove from cart </button> <br>';
       // echo '<a class="download-link" href="data:audio/mpeg;base64,' . base64_encode($beat['data']->getData()) . '" download="' . $beat['uploadedaudio'] . '">Download</a>';
   echo '<div id="cartCounter"></div>';
+
+  $colname = 'user'; // Collection name where user data is stored
+
+// Fetch the name of the uploader from the 'user' collection based on 'user_id'
+$userCollection = $database->$colname; // Get the collection object
+$user = $userCollection->findOne(['_id' => new MongoDB\BSON\ObjectId($beat['user_id'])]); // Fetch the user document
+
+// Check if the user document is found
+if ($user) {
+    echo "By: " . $user['name']; // Display the uploader's name
+} else {
+    echo "Unknown"; // Handle the case where uploader is not found
+}
   echo '</div>';
   echo '</div>';
 }
 
+      // Check if search query is provided
+    if (isset($_GET['search'])) {
+      $searchText = $_GET['search'];
+
+      // MongoDB query to search tracks by track name or genre
+      $filter = [
+          '$or' => [
+              ['uploadedaudio' => ['$regex' => $searchText, '$options' => 'i']], // Search by track name
+              ['genre' => ['$regex' => $searchText, '$options' => 'i']] // Search by genre
+          ]
+      ]; // 'i' option for case-insensitive search
+      $beats = $collection->find($filter);
+    } else {
+      // If no search query provided, fetch all tracks
+      $beats = $collection->find();
+    }
+
+    // Loop through and display tracks
+    foreach ($beats as $beat) {
+      // Display track details as before
+    }
+
 ?> 
         
 </div>
+
+
+
+    <div class="pic-1">
+      <img src="assets/pexels-photo-8412420.jpeg">
+    </div>
+    <div>
+      <h1 class="txt-2" >
+      COMMENCE YOUR MUSIC JOURNEY <br> START SELLING YOUR BEATS TODAY!
+      </h1>
+    </div>
+    <div class="txt-3">
+      <h1>
+          Looking for the platform to sell your beats? We got you!
+      </h1>
+        <p>
+          <strong> &#x2713; The right marketplace for quality beats</strong> <br> Be able to browse through and get high quality beats
+        </p>
+        <p>
+          <strong> &#x2713;Affordable beat pricing</strong> <br> Get quality beats at an affordable price
+        </p>
+        <p>
+          <strong> &#x2713;Flawless Purchasing Experience</strong> <br> Utilize the user-friendly interface to purchase beats without any problem
+        </p>
+        <div>
+          <a href="login.php">                                      
+          <button class="get-started-btn"> Get started</button>
+        </div> </a>
+    </div>
+
+
+
+    
 
 
 
@@ -202,15 +245,31 @@ foreach ($beats as $beat){
         george47were@gmail.com
       </div>
     </footer>
-</body>
-<script>
+    <script>
     let cartCounter = 0;
     
-    function addItem() {
-        cartCounter = cartCounter + 1;
-        console.log('Item added to cart');
+    function addItem(id, uploadedaudio, price) {
+        // Increment cart counter
+        cartCounter++;
+        // Update the cart counter display
         updateCartCounter();
-    }
+        // Redirect to cart.php with beat details as URL parameters
+        // window.location.href = 'cart.php?id=' + id + '&uploadedaudio=' + uploadedaudio + '&price=' + price;
+        
+
+        // new code
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "add_to_cart.php", true);
+          xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              // Handle response if needed
+              console.log(xhr.responseText);
+            }
+          };
+          xhr.send("id=" + id + "&uploadedaudio=" + uploadedaudio + "&price=" + price);
+      }
+
 
     function removeItem() {
         if (cartCounter > 0) {
@@ -224,7 +283,34 @@ foreach ($beats as $beat){
         document.getElementById('cartCounter').innerText = cartCounter;
     }
     
+    </script>
+
+    <script>
+  function searchTracks() {
+    // Get the value entered in the search input
+    var searchText = document.getElementById('searchInput').value.toLowerCase();
+
+    // Get all track elements
+    var trackElements = document.getElementsByClassName('track-holder');
+
+    // Loop through each track element
+    for (var i = 0; i < trackElements.length; i++) {
+        // Get the track name within the current track element
+        var trackName = trackElements[i].querySelector('h2').innerText.toLowerCase();
+
+        // Check if the track name contains the search text
+        if (trackName.includes(searchText)) {
+            // If it matches, display the track
+            trackElements[i].style.display = 'block';
+        } else {
+            // If it doesn't match, hide the track
+            trackElements[i].style.display = 'none';
+        }
+    }
+}
 </script>
+</body>
+
 
 
 </html>

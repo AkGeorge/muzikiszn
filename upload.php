@@ -52,6 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bpm = $_POST['bpm'];
     $price = $_POST['price'];
     $tags = $_POST['tags'];
+    $genre = $_POST['genre'];
+    $date = $_POST['date'];
 
     // Check if file is uploaded
     if(isset($_FILES['fileToUpload'])) {
@@ -73,7 +75,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'keyInfo' => $keyInfo,
                 'bpm' => $bpm,
                 'price' => $price,
-                'tags' => $tags
+                'tags' => $tags,
+                'genre' => $genre,
+                'date' => $date
             ];
 
             // Insert the document into MongoDB
@@ -119,6 +123,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #fff;
             font-size: 30px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            
+            
+
         }
     </style>
 
@@ -151,6 +158,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <h2 class="upload-txt">Tags:</h2>
     <input type="text" name="tags" id="tags" placeholder="Input tags" required>
 </div>
+<div>
+    <h2 class="upload-txt">Genre:</h2>
+    <input type="text" name="genre" id="genre" placeholder="Input genre"  required>
+</div>
+<div>
+    <h2 class="upload-txt">Date:</h2>
+    <input type="text" name="date" id="date" placeholder="Date" readonly>
+</div>
+
 </form>
 
 
@@ -184,6 +200,26 @@ function formatCurrency(input) {
 document.getElementById('money').addEventListener('input', function() {
     formatCurrency(this);
 });
+</script>
+<script>
+    // Function to set current date
+    function setCurrentDate() {
+        var currentDate = new Date();
+        var day = currentDate.getDate();
+        var month = currentDate.getMonth() + 1;
+        var year = currentDate.getFullYear();
+
+        // Format the date as YYYY-MM-DD
+        var formattedDate = year + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day);
+
+        // Set the value of the date input field
+        document.getElementById('date').value = formattedDate;
+    }
+
+    // Call the function to set current date when the page loads
+    window.onload = function() {
+        setCurrentDate();
+    };
 </script>
 </body>
 </html> 

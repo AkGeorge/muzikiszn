@@ -19,35 +19,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Find user by email
     $user = $collection->findOne(['email' => $email]);
     
-//     // Check if user exists and verify password
-//     if ($user && password_verify($password, $user['password'])) {
-//       // Start session and store user information
-//       $_SESSION['user_id'] = $user['_id']; // Assuming '_id' is the user's unique identifier
-//       $_SESSION['username'] = $user['username']; // Assuming 'username' is a field in the user document
-
-//       // Redirect to dashboard or another page
-//       header("Location: dashboard.php");
-//       exit();
-//   } else {
-//       echo "Invalid email or password";
-//   }
-// }
-
     // Check if user exists and verify password
-      if ($user && password_verify($password, $user['password'])) {
-          echo "Login successful!";
-          $_SESSION['user_id'] = $user['_id']; // Assuming '_id' is the user's unique identifier
-          $_SESSION['name'] = $user['name']; // Assuming 'username' is a field in the user document
-          // Redirect to dashboard or another page
-          header("Location: dashboard.php");
-          exit();
-      } else {
-          echo "Invalid email or password";
-      }
+    if ($user && password_verify($password, $user['password'])) {
+        echo "Login successful!";
+        $_SESSION['user_id'] = $user['_id']; // Assuming '_id' is the user's unique identifier
+        $_SESSION['name'] = $user['name']; // Assuming 'username' is a field in the user document
+        // Redirect to dashboard or another page
+        header("Location: dashboard.php");
+        exit();
+    } else {
+        echo "Invalid email or password";
+    }
 }
+
 ?>
-
-
 
 
 
@@ -119,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         background-color: #1e2227;
         padding: 12px;
         width: 30%;
-        height: 300px;
+        height: 350px;
         border: 2px grey solid;
         margin-top: 150px;
         border-radius: 7px;
@@ -159,6 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           <p>Don't have an account?</p>
           <a href="signup.php">Sign up</a>
       </div>
+      <p>Forgot your password? <a href="password_reset.php">Reset it here</a></p>
     </div>
   </body>
 </html>
